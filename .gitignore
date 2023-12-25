@@ -1,0 +1,57 @@
+# Ignore Python bytecode
+__pycache__/
+*.pyc
+
+# Ignore database files
+*.sqlite3
+
+# Ignore staticfiles directory
+staticfiles/
+
+# Ignore media files
+media/
+
+# Ignore virtual environment
+venv/
+env/
+
+# Ignore local development settings
+local_settings.py
+
+# Ignore secret key and sensitive information
+*.secret
+
+# Ignore logs
+*.log
+
+# Ignore temporary files
+*.swp
+*~
+
+# Ignore environment configuration files
+.env
+
+# Ignore coverage reports
+htmlcov/
+
+# Ignore IDE-specific files and directories
+.vscode/
+.idea/
+
+# Ignore compiled Python files
+*.pyc
+
+# Ignore macOS system files
+.DS_Store
+
+# Ignore node modules
+node_modules/
+
+# Ignore compiled JavaScript files
+*.js
+
+# Ignore compiled CSS files
+*.css
+
+# Ignore database migrations
+**/migrations/
