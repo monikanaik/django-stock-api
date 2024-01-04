@@ -20,42 +20,18 @@ class AverageBuyPriceView(APIView):
             trade_date = self.request.data['trade_date']
             trade_date = datetime.strptime(trade_date, '%Y-%m-%d').date()
 
-            # Filter transactions until and including the given date
+            # Filter only 'BUY' transactions until and including the given date
             transactions_until_date = Transaction.objects.filter(
-                trade_date__lte=trade_date  # Include transactions on the specified date
+                trade_type='BUY',
+                trade_date__lte=trade_date
             ).order_by('trade_date')
-
             if transactions_until_date.exists():
                 total_qty = 0
                 total_value = 0
 
                 for transaction in transactions_until_date:
-                    if transaction.trade_type == 'BUY':
-                        total_qty += transaction.quantity
-                        total_value += transaction.quantity * transaction.price_per_share
-
-                    elif transaction.trade_type == 'SELL':
-                        # Handle FIFO logic for selling shares
-                        sell_qty = transaction.quantity
-
-                        # Deduct sold shares from the earliest bought shares (FIFO)
-                        while sell_qty > 0 and transactions_until_date.exists():
-                            earliest_transaction = transactions_until_date.first()
-
-                            if earliest_transaction.trade_type == 'BUY':
-                                if earliest_transaction.quantity <= sell_qty:
-                                    sell_qty -= earliest_transaction.quantity
-                                    total_qty -= earliest_transaction.quantity
-                                    total_value -= earliest_transaction.quantity * earliest_transaction.price_per_share
-                                    earliest_transaction.delete()
-                                else:
-                                    earliest_transaction.quantity -= sell_qty
-                                    total_qty -= sell_qty
-                                    total_value -= sell_qty * earliest_transaction.price_per_share
-                                    sell_qty = 0
-                            else:
-                                # Skip SELL transactions in the FIFO logic
-                                earliest_transaction.delete()
+                    total_qty += transaction.quantity
+                    total_value += transaction.quantity * transaction.price_per_share
 
                 average_buy_price = total_value / total_qty if total_qty > 0 else 0
                 balance_qty = total_qty
@@ -67,7 +43,7 @@ class AverageBuyPriceView(APIView):
 
                 return Response(result_data)
             else:
-                return Response({"error": "No transactions found for the specified date."})
+                return Response({"error": "No 'BUY' transactions found for the specified date."})
         except Exception as e:
             return Response({"error": str(e)})
 
@@ -141,4 +117,3 @@ class SplitTransactionView(APIView):
         except Exception as e:
             # Handle any exceptions that may occur during processing
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
